@@ -57,4 +57,51 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).save(any(User.class));
     }
+    
+    @Test
+    void registerNewUser_shouldThrowExceptionWhenEmailAlreadyExists() {
+        // Arrange
+        UserRegistrationDto userRegistrationDto = new UserRegistrationDto();
+        userRegistrationDto.setEmail("existing@example.com");
+        userRegistrationDto.setPhoneNumber("1234567890");
+        userRegistrationDto.setUserType("FOODIE");
+
+        // Mock that an existing user already has this email
+        when(userRepository.existsByEmail(userRegistrationDto.getEmail())).thenReturn(true);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.registerNewUser(userRegistrationDto);
+        });
+
+        assertEquals("Email already in use", exception.getMessage());
+
+        verify(userRepository, times(1)).existsByEmail(userRegistrationDto.getEmail());
+        verify(userRepository, never()).existsByPhoneNumber(anyString());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void registerNewUser_shouldThrowExceptionWhenPhoneNumberAlreadyExists() {
+        // Arrange
+        UserRegistrationDto userRegistrationDto = new UserRegistrationDto();
+        userRegistrationDto.setEmail("newuser@example.com");
+        userRegistrationDto.setPhoneNumber("9876543210");
+        userRegistrationDto.setUserType("DELIVERY_PARTNER");
+
+        // Mock that an existing user already has this phone number
+        when(userRepository.existsByEmail(userRegistrationDto.getEmail())).thenReturn(false);
+        when(userRepository.existsByPhoneNumber(userRegistrationDto.getPhoneNumber())).thenReturn(true);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.registerNewUser(userRegistrationDto);
+        });
+
+        assertEquals("Phone number already in use", exception.getMessage());
+
+        verify(userRepository, times(1)).existsByEmail(userRegistrationDto.getEmail());
+        verify(userRepository, times(1)).existsByPhoneNumber(userRegistrationDto.getPhoneNumber());
+        verify(userRepository, never()).save(any(User.class));
+    }
 }

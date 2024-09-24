@@ -17,12 +17,12 @@ public class UserService {
     private UserRepository userRepository;
 
     public User registerNewUser(UserRegistrationDto registrationDto) {
-        if (userRepository.findByEmail(registrationDto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email is already in use");
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new IllegalArgumentException("Email already in use");
         }
 
-        if (userRepository.findByPhoneNumber(registrationDto.getPhoneNumber()).isPresent()) {
-            throw new RuntimeException("Phone number is already in use");
+        if (userRepository.existsByPhoneNumber(registrationDto.getPhoneNumber())) {
+            throw new IllegalArgumentException("Phone number already in use");
         }
 
         User user = new User();

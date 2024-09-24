@@ -85,4 +85,8 @@ public class UserRegistrationDto {
     	this.phoneNumber = phoneNumber;
     	this.userType = userType;
     }
+
+	public UserRegistrationDto() {
+		// TODO Auto-generated constructor stub
+	}
 }
